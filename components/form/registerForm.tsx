@@ -25,16 +25,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/hooks/auth.hook";
 import { registerSchema } from "@/validation/auth.validation";
-
+import { getFieldError } from "@/lib/form-error";
 
 
 export function RegisterForm() {
   const router = useRouter();
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const registerMutation =useRegister();
+  const registerMutation = useRegister();
 
   const form = useForm({
     defaultValues: {
@@ -44,11 +42,9 @@ export function RegisterForm() {
       password: "",
       confirmPassword: "",
     },
-
     validators: {
       onSubmit: registerSchema,
     },
-
     onSubmit: async ({ value }) => {
       const registrationData = {
         name: value.name,
@@ -59,10 +55,7 @@ export function RegisterForm() {
 
       registerMutation.mutate(registrationData, {
         onSuccess: () => {
-          const params = new URLSearchParams({
-            email: value.email,
-          });
-
+          const params = new URLSearchParams({ email: value.email });
           router.push(`/verify-email?${params.toString()}`);
         },
       });
@@ -87,12 +80,10 @@ export function RegisterForm() {
               <Ambulance className="size-6" strokeWidth={2.2} />
               <span className="absolute -bottom-1 -right-1 size-5 rounded-full border-2 border-white bg-emerald-400" />
             </span>
-
             <span className="space-y-0.5">
               <span className="block text-xl font-extrabold tracking-tight text-slate-950">
                 Ambu<span className="text-rose-600">link</span>
               </span>
-
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 Emergency care network
               </span>
@@ -111,14 +102,12 @@ export function RegisterForm() {
             <Sparkles className="size-3.5" />
             Join the network
           </div>
-
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-[2.6rem] sm:leading-[1.12]">
             Create your{" "}
             <span className="bg-gradient-to-r from-rose-600 via-red-600 to-orange-500 bg-clip-text text-transparent">
               account.
             </span>
           </h1>
-
           <p className="max-w-sm text-sm leading-6 text-slate-600 sm:text-[15px]">
             Set up your profile to request emergency ambulance services.
           </p>
@@ -131,14 +120,12 @@ export function RegisterForm() {
               <h2 className="text-lg font-bold tracking-tight text-slate-950">
                 Sign up with email
               </h2>
-
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Fill in your details. You&apos;ll verify your email with an
-                OTP.
+                Fill in your details. You&apos;ll verify your email with an OTP.
               </p>
             </div>
 
-            {/* Backend/API error */}
+            {/* API error */}
             {registerMutation.isError && (
               <div
                 role="alert"
@@ -165,33 +152,27 @@ export function RegisterForm() {
               <form.Field name="name">
                 {(field) => {
                   const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-
+                    field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0;
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Full name
                       </Label>
-
                       <div className="group relative">
                         <UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
-
                         <Input
                           placeholder="Your full name"
                           value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
                       </div>
-
                       {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {field.state.meta.errors[0]?.message ??
-                            String(field.state.meta.errors[0] ?? "")}
+                          {getFieldError(field.state.meta.errors)}
                         </p>
                       )}
                     </div>
@@ -203,34 +184,28 @@ export function RegisterForm() {
               <form.Field name="email">
                 {(field) => {
                   const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-
+                    field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0;
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Email address
                       </Label>
-
                       <div className="group relative">
                         <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
-
                         <Input
                           type="email"
                           placeholder="you@example.com"
                           value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
                       </div>
-
                       {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {field.state.meta.errors[0]?.message ??
-                            String(field.state.meta.errors[0] ?? "")}
+                          {getFieldError(field.state.meta.errors)}
                         </p>
                       )}
                     </div>
@@ -242,34 +217,28 @@ export function RegisterForm() {
               <form.Field name="phone">
                 {(field) => {
                   const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-
+                    field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0;
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Phone number
                       </Label>
-
                       <div className="group relative">
                         <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
-
                         <Input
                           type="tel"
                           placeholder="01712345678"
                           value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
                       </div>
-
                       {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {field.state.meta.errors[0]?.message ??
-                            String(field.state.meta.errors[0] ?? "")}
+                          {getFieldError(field.state.meta.errors)}
                         </p>
                       )}
                     </div>
@@ -281,36 +250,28 @@ export function RegisterForm() {
               <form.Field name="password">
                 {(field) => {
                   const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-
+                    field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0;
                   const password = field.state.value;
-
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Password
                       </Label>
-
                       <div className="group relative">
                         <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
-
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="At least 8 characters"
                           value={password}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 pr-12 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
-
                         <button
                           type="button"
-                          onClick={() =>
-                            setShowPassword((value) => !value)
-                          }
+                          onClick={() => setShowPassword((v) => !v)}
                           className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                         >
                           {showPassword ? (
@@ -348,8 +309,7 @@ export function RegisterForm() {
 
                       {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {field.state.meta.errors[0]?.message ??
-                            String(field.state.meta.errors[0] ?? "")}
+                          {getFieldError(field.state.meta.errors)}
                         </p>
                       )}
                     </div>
@@ -364,48 +324,35 @@ export function RegisterForm() {
                   onChangeListenTo: ["password"],
                   onChange: ({ value, fieldApi }) => {
                     if (!value) return "Please confirm your password";
-
-                    const password =
-                      fieldApi.form.getFieldValue("password");
-
-                    if (value !== password) {
-                      return "Passwords do not match";
-                    }
-
+                    const password = fieldApi.form.getFieldValue("password");
+                    if (value !== password) return "Passwords do not match";
                     return undefined;
                   },
                 }}
               >
                 {(field) => {
                   const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-
+                    field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0;
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Confirm password
                       </Label>
-
                       <div className="group relative">
                         <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
-
                         <Input
                           type={showConfirm ? "text" : "password"}
                           placeholder="Re-enter your password"
                           value={field.state.value}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           onBlur={field.handleBlur}
                           disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 pr-12 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
-
                         <button
                           type="button"
-                          onClick={() =>
-                            setShowConfirm((value) => !value)
-                          }
+                          onClick={() => setShowConfirm((v) => !v)}
                           className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                         >
                           {showConfirm ? (
@@ -415,13 +362,10 @@ export function RegisterForm() {
                           )}
                         </button>
                       </div>
-
                       {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-  {typeof field.state.meta.errors[0] === "string"
-    ? field.state.meta.errors[0]
-    : field.state.meta.errors[0]?.message ?? ""}
-</p>
+                          {getFieldError(field.state.meta.errors)}
+                        </p>
                       )}
                     </div>
                   );
@@ -433,9 +377,7 @@ export function RegisterForm() {
                 {([isSubmitting]) => (
                   <Button
                     type="submit"
-                    disabled={
-                      registerMutation.isPending || isSubmitting
-                    }
+                    disabled={registerMutation.isPending || isSubmitting}
                     className="group relative h-[50px] w-full overflow-hidden rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-600 bg-[length:200%_100%] text-sm font-bold text-white shadow-lg shadow-rose-600/20 transition-all duration-300 hover:bg-right hover:shadow-xl hover:shadow-rose-600/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {registerMutation.isPending || isSubmitting ? (
@@ -457,7 +399,6 @@ export function RegisterForm() {
 
           <div className="flex items-center justify-center gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-3.5">
             <ShieldCheck className="size-4 shrink-0 text-emerald-600" />
-
             <p className="text-[11px] leading-5 text-slate-600">
               You&apos;ll verify your email with a 6-digit OTP after signup.
             </p>
@@ -480,13 +421,7 @@ export function RegisterForm() {
   );
 }
 
-function PasswordReq({
-  ok,
-  label,
-}: {
-  ok: boolean;
-  label: string;
-}) {
+function PasswordReq({ ok, label }: { ok: boolean; label: string }) {
   return (
     <li
       className={`flex items-center gap-1.5 transition-colors ${
