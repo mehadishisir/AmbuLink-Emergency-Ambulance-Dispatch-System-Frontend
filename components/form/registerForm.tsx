@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import {
   Ambulance,
@@ -22,70 +23,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRegister } from "@/hooks/auth.hook";
+import { registerSchema } from "@/validation/auth.validation";
 
-// ============================================
-// Validation Rules (Backend-compatible)
-// ============================================
-const passwordChecks = {
-  minLength: (v: string) => v.length >= 8,
-  hasUpper: (v: string) => /[A-Z]/.test(v),
-  hasLower: (v: string) => /[a-z]/.test(v),
-  hasNumber: (v: string) => /[0-9]/.test(v),
-  hasSpecial: (v: string) => /[^A-Za-z0-9]/.test(v),
-};
 
-function validatePassword(v: string): string | undefined {
-  if (!v) return "Password is required";
-  if (!passwordChecks.minLength(v))
-    return "Password must be at least 8 characters";
-  if (!passwordChecks.hasUpper(v))
-    return "Password must contain an uppercase letter";
-  if (!passwordChecks.hasLower(v))
-    return "Password must contain a lowercase letter";
-  if (!passwordChecks.hasNumber(v)) return "Password must contain a number";
-  if (!passwordChecks.hasSpecial(v))
-    return "Password must contain a special character";
-  return undefined;
-}
-
-const rules = {
-  name: (v: string) =>
-    !v
-      ? "Name is required"
-      : v.length < 3
-        ? "Name must be at least 3 characters"
-        : undefined,
-  email: (v: string) =>
-    !v
-      ? "Email is required"
-      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-        ? "Please enter a valid email address"
-        : undefined,
-  phone: (v: string) =>
-    !v
-      ? "Phone number is required"
-      : !/^(\+?880|0)1[3-9]\d{8}$/.test(v)
-        ? "Enter a valid Bangladeshi phone number (e.g. 01712345678)"
-        : undefined,
-  password: validatePassword,
-};
-
-function getErrorMessage(errors: unknown[]): string | undefined {
-  if (!errors || errors.length === 0) return undefined;
-  const first = errors[0];
-  if (typeof first === "string") return first;
-  if (first && typeof first === "object" && "message" in first) {
-    return String((first as { message: unknown }).message);
-  }
-  return undefined;
-}
 
 export function RegisterForm() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+
+  const registerMutation =useRegister();
 
   const form = useForm({
     defaultValues: {
@@ -95,49 +44,28 @@ export function RegisterForm() {
       password: "",
       confirmPassword: "",
     },
+
+    validators: {
+      onSubmit: registerSchema,
+    },
+
     onSubmit: async ({ value }) => {
-      setError("");
-      setNotice("");
-      setIsLoading(true);
+      const registrationData = {
+        name: value.name,
+        email: value.email,
+        phone: value.phone,
+        password: value.password,
+      };
 
-      try {
-        // ⚠️ কখনো password log করব না
-        console.log("Register submit:", {
-          name: value.name,
-          email: value.email,
-          phone: value.phone,
-        });
+      registerMutation.mutate(registrationData, {
+        onSuccess: () => {
+          const params = new URLSearchParams({
+            email: value.email,
+          });
 
-        // TODO: Day 3 — POST /api/auth/register
-        // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     name: value.name,
-        //     email: value.email,
-        //     phone: value.phone,
-        //     password: value.password,
-        //   }),
-        // });
-        // if (!res.ok) {
-        //   const data = await res.json().catch(() => null);
-        //   throw new Error(data?.message || "Registration failed");
-        // }
-        // router.push(`/verify-email?email=${encodeURIComponent(value.email)}`);
-
-        setNotice(
-          "Registration API integration is pending. It will connect in Day 3.",
-        );
-      } catch (err) {
-        // 🔴 Backend error message দেখাব
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Something went wrong. Please try again.";
-        setError(message);
-      } finally {
-        setIsLoading(false);
-      }
+          router.push(`/verify-email?${params.toString()}`);
+        },
+      });
     },
   });
 
@@ -159,10 +87,12 @@ export function RegisterForm() {
               <Ambulance className="size-6" strokeWidth={2.2} />
               <span className="absolute -bottom-1 -right-1 size-5 rounded-full border-2 border-white bg-emerald-400" />
             </span>
+
             <span className="space-y-0.5">
               <span className="block text-xl font-extrabold tracking-tight text-slate-950">
                 Ambu<span className="text-rose-600">link</span>
               </span>
+
               <span className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 Emergency care network
               </span>
@@ -181,12 +111,14 @@ export function RegisterForm() {
             <Sparkles className="size-3.5" />
             Join the network
           </div>
+
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-[2.6rem] sm:leading-[1.12]">
             Create your{" "}
             <span className="bg-gradient-to-r from-rose-600 via-red-600 to-orange-500 bg-clip-text text-transparent">
               account.
             </span>
           </h1>
+
           <p className="max-w-sm text-sm leading-6 text-slate-600 sm:text-[15px]">
             Set up your profile to request emergency ambulance services.
           </p>
@@ -199,30 +131,25 @@ export function RegisterForm() {
               <h2 className="text-lg font-bold tracking-tight text-slate-950">
                 Sign up with email
               </h2>
+
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Fill in your details. You&apos;ll verify your email with an OTP.
+                Fill in your details. You&apos;ll verify your email with an
+                OTP.
               </p>
             </div>
 
-            {/* Error */}
-            {error && (
+            {/* Backend/API error */}
+            {registerMutation.isError && (
               <div
                 role="alert"
                 className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
               >
                 <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <p>{error}</p>
-              </div>
-            )}
-
-            {/* Notice */}
-            {notice && (
-              <div
-                role="status"
-                className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
-              >
-                <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <p>{notice}</p>
+                <p>
+                  {registerMutation.error instanceof Error
+                    ? registerMutation.error.message
+                    : "Registration failed. Please try again."}
+                </p>
               </div>
             )}
 
@@ -235,33 +162,36 @@ export function RegisterForm() {
               className="space-y-5"
             >
               {/* Name */}
-              <form.Field
-                name="name"
-                validators={{
-                  onChange: ({ value }) => rules.name(value),
-                }}
-              >
+              <form.Field name="name">
                 {(field) => {
-                  const err = getErrorMessage(field.state.meta.errors);
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Full name
                       </Label>
+
                       <div className="group relative">
                         <UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
+
                         <Input
                           placeholder="Your full name"
                           value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value)
+                          }
                           onBlur={field.handleBlur}
-                          disabled={isLoading}
+                          disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
                       </div>
-                      {err && field.state.meta.isTouched && (
+
+                      {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {err}
+                          {field.state.meta.errors[0]?.message ??
+                            String(field.state.meta.errors[0] ?? "")}
                         </p>
                       )}
                     </div>
@@ -270,34 +200,37 @@ export function RegisterForm() {
               </form.Field>
 
               {/* Email */}
-              <form.Field
-                name="email"
-                validators={{
-                  onChange: ({ value }) => rules.email(value),
-                }}
-              >
+              <form.Field name="email">
                 {(field) => {
-                  const err = getErrorMessage(field.state.meta.errors);
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Email address
                       </Label>
+
                       <div className="group relative">
                         <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
+
                         <Input
                           type="email"
                           placeholder="you@example.com"
                           value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value)
+                          }
                           onBlur={field.handleBlur}
-                          disabled={isLoading}
+                          disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
                       </div>
-                      {err && field.state.meta.isTouched && (
+
+                      {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {err}
+                          {field.state.meta.errors[0]?.message ??
+                            String(field.state.meta.errors[0] ?? "")}
                         </p>
                       )}
                     </div>
@@ -306,34 +239,37 @@ export function RegisterForm() {
               </form.Field>
 
               {/* Phone */}
-              <form.Field
-                name="phone"
-                validators={{
-                  onChange: ({ value }) => rules.phone(value),
-                }}
-              >
+              <form.Field name="phone">
                 {(field) => {
-                  const err = getErrorMessage(field.state.meta.errors);
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Phone number
                       </Label>
+
                       <div className="group relative">
                         <Phone className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
+
                         <Input
                           type="tel"
                           placeholder="01712345678"
                           value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value)
+                          }
                           onBlur={field.handleBlur}
-                          disabled={isLoading}
+                          disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
                       </div>
-                      {err && field.state.meta.isTouched && (
+
+                      {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {err}
+                          {field.state.meta.errors[0]?.message ??
+                            String(field.state.meta.errors[0] ?? "")}
                         </p>
                       )}
                     </div>
@@ -342,34 +278,39 @@ export function RegisterForm() {
               </form.Field>
 
               {/* Password */}
-              <form.Field
-                name="password"
-                validators={{
-                  onChange: ({ value }) => rules.password(value),
-                }}
-              >
+              <form.Field name="password">
                 {(field) => {
-                  const err = getErrorMessage(field.state.meta.errors);
-                  const pw = field.state.value;
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  const password = field.state.value;
+
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Password
                       </Label>
+
                       <div className="group relative">
                         <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
+
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="At least 8 characters"
-                          value={pw}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          value={password}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value)
+                          }
                           onBlur={field.handleBlur}
-                          disabled={isLoading}
+                          disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 pr-12 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
+
                         <button
                           type="button"
-                          onClick={() => setShowPassword((v) => !v)}
+                          onClick={() =>
+                            setShowPassword((value) => !value)
+                          }
                           className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                         >
                           {showPassword ? (
@@ -380,35 +321,35 @@ export function RegisterForm() {
                         </button>
                       </div>
 
-                      {/* Live password requirements */}
-                      {pw.length > 0 && (
+                      {password.length > 0 && (
                         <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
                           <PasswordReq
-                            ok={passwordChecks.minLength(pw)}
+                            ok={password.length >= 8}
                             label="8+ characters"
                           />
                           <PasswordReq
-                            ok={passwordChecks.hasUpper(pw)}
+                            ok={/[A-Z]/.test(password)}
                             label="Uppercase"
                           />
                           <PasswordReq
-                            ok={passwordChecks.hasLower(pw)}
+                            ok={/[a-z]/.test(password)}
                             label="Lowercase"
                           />
                           <PasswordReq
-                            ok={passwordChecks.hasNumber(pw)}
+                            ok={/[0-9]/.test(password)}
                             label="Number"
                           />
                           <PasswordReq
-                            ok={passwordChecks.hasSpecial(pw)}
+                            ok={/[^A-Za-z0-9]/.test(password)}
                             label="Special char"
                           />
                         </ul>
                       )}
 
-                      {err && field.state.meta.isTouched && (
+                      {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {err}
+                          {field.state.meta.errors[0]?.message ??
+                            String(field.state.meta.errors[0] ?? "")}
                         </p>
                       )}
                     </div>
@@ -423,33 +364,48 @@ export function RegisterForm() {
                   onChangeListenTo: ["password"],
                   onChange: ({ value, fieldApi }) => {
                     if (!value) return "Please confirm your password";
-                    const password = fieldApi.form.getFieldValue("password");
-                    if (value !== password) return "Passwords do not match";
+
+                    const password =
+                      fieldApi.form.getFieldValue("password");
+
+                    if (value !== password) {
+                      return "Passwords do not match";
+                    }
+
                     return undefined;
                   },
                 }}
               >
                 {(field) => {
-                  const err = getErrorMessage(field.state.meta.errors);
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
                   return (
                     <div className="space-y-2">
                       <Label className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600">
                         Confirm password
                       </Label>
+
                       <div className="group relative">
                         <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600" />
+
                         <Input
                           type={showConfirm ? "text" : "password"}
                           placeholder="Re-enter your password"
                           value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value)
+                          }
                           onBlur={field.handleBlur}
-                          disabled={isLoading}
+                          disabled={registerMutation.isPending}
                           className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 pr-12 text-sm placeholder:text-slate-400 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
                         />
+
                         <button
                           type="button"
-                          onClick={() => setShowConfirm((v) => !v)}
+                          onClick={() =>
+                            setShowConfirm((value) => !value)
+                          }
                           className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                         >
                           {showConfirm ? (
@@ -459,10 +415,13 @@ export function RegisterForm() {
                           )}
                         </button>
                       </div>
-                      {err && field.state.meta.isTouched && (
+
+                      {isInvalid && (
                         <p className="text-xs font-medium text-red-600">
-                          {err}
-                        </p>
+  {typeof field.state.meta.errors[0] === "string"
+    ? field.state.meta.errors[0]
+    : field.state.meta.errors[0]?.message ?? ""}
+</p>
                       )}
                     </div>
                   );
@@ -474,10 +433,12 @@ export function RegisterForm() {
                 {([isSubmitting]) => (
                   <Button
                     type="submit"
-                    disabled={isLoading || isSubmitting}
+                    disabled={
+                      registerMutation.isPending || isSubmitting
+                    }
                     className="group relative h-[50px] w-full overflow-hidden rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-600 bg-[length:200%_100%] text-sm font-bold text-white shadow-lg shadow-rose-600/20 transition-all duration-300 hover:bg-right hover:shadow-xl hover:shadow-rose-600/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isLoading || isSubmitting ? (
+                    {registerMutation.isPending || isSubmitting ? (
                       <>
                         <LoaderCircle className="mr-2 size-4 animate-spin" />
                         Creating your account...
@@ -496,6 +457,7 @@ export function RegisterForm() {
 
           <div className="flex items-center justify-center gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-3.5">
             <ShieldCheck className="size-4 shrink-0 text-emerald-600" />
+
             <p className="text-[11px] leading-5 text-slate-600">
               You&apos;ll verify your email with a 6-digit OTP after signup.
             </p>
@@ -518,10 +480,13 @@ export function RegisterForm() {
   );
 }
 
-// ============================================
-// Live password requirement indicator
-// ============================================
-function PasswordReq({ ok, label }: { ok: boolean; label: string }) {
+function PasswordReq({
+  ok,
+  label,
+}: {
+  ok: boolean;
+  label: string;
+}) {
   return (
     <li
       className={`flex items-center gap-1.5 transition-colors ${
@@ -529,7 +494,9 @@ function PasswordReq({ ok, label }: { ok: boolean; label: string }) {
       }`}
     >
       <span
-        className={`size-1.5 rounded-full ${ok ? "bg-emerald-500" : "bg-slate-300"}`}
+        className={`size-1.5 rounded-full ${
+          ok ? "bg-emerald-500" : "bg-slate-300"
+        }`}
       />
       {label}
     </li>
