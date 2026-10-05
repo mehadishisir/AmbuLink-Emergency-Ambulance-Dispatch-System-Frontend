@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
+
 import {
   Ambulance,
   ArrowRight,
@@ -20,13 +21,17 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+import {
+  nameValidator,
+  emailValidator,
+  phoneValidator,
+  passwordValidator,
+} from "@/validation/auth.validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/hooks/auth.hook";
-import { registerSchema } from "@/validation/auth.validation";
 import { getFieldError } from "@/lib/form-error";
-
 
 export function RegisterForm() {
   const router = useRouter();
@@ -41,9 +46,6 @@ export function RegisterForm() {
       phone: "",
       password: "",
       confirmPassword: "",
-    },
-    validators: {
-      onSubmit: registerSchema,
     },
     onSubmit: async ({ value }) => {
       const registrationData = {
@@ -149,7 +151,10 @@ export function RegisterForm() {
               className="space-y-5"
             >
               {/* Name */}
-              <form.Field name="name">
+              <form.Field
+                name="name"
+                validators={{ onChange: nameValidator }}
+              >
                 {(field) => {
                   const isInvalid =
                     field.state.meta.isTouched &&
@@ -181,7 +186,10 @@ export function RegisterForm() {
               </form.Field>
 
               {/* Email */}
-              <form.Field name="email">
+              <form.Field
+                name="email"
+                validators={{ onChange: emailValidator }}
+              >
                 {(field) => {
                   const isInvalid =
                     field.state.meta.isTouched &&
@@ -214,7 +222,10 @@ export function RegisterForm() {
               </form.Field>
 
               {/* Phone */}
-              <form.Field name="phone">
+              <form.Field
+                name="phone"
+                validators={{ onChange: phoneValidator }}
+              >
                 {(field) => {
                   const isInvalid =
                     field.state.meta.isTouched &&
@@ -247,7 +258,10 @@ export function RegisterForm() {
               </form.Field>
 
               {/* Password */}
-              <form.Field name="password">
+              <form.Field
+                name="password"
+                validators={{ onChange: passwordValidator }}
+              >
                 {(field) => {
                   const isInvalid =
                     field.state.meta.isTouched &&
