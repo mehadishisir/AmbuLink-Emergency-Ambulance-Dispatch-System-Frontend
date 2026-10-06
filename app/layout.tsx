@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
+
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -23,7 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geist.variable} font-sans antialiased`}>
         
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>{children} <Toaster position="top-right" richColors /></QueryProvider>
       </body>
     </html>
   );
