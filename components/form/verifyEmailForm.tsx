@@ -31,6 +31,7 @@ import {
 import { useVerifyEmail } from "@/hooks/auth.hook";
 import { useAuthStore } from "@/stores/auth-store";
 import { verifyAccountSchema } from "@/validation/auth.validation";
+import { getErrorMessage } from "@/lib/error";
 
 
 const RESEND_COOLDOWN = 120;
@@ -45,14 +46,14 @@ export default function VerifyEmailForm() {
   const { mutate: verify, isPending } = useVerifyEmail();
   const email = searchParams.get("email") || "";
 
-  // Redirect if no email in query
+  
   useEffect(() => {
     if (!email) {
       router.replace("/register");
     }
   }, [email, router]);
 
-  // Resend countdown
+
   useEffect(() => {
     if (resendTimer <= 0) return;
     const timer = setInterval(() => {
@@ -82,12 +83,9 @@ export default function VerifyEmailForm() {
           },
           onError: (err) => {
             form.reset();
-            toast.error("Verification failed", {
-              description:
-                err instanceof Error
-                  ? err.message
-                  : "Something went wrong. Please try again",
-            });
+          toast.error("Verification failed", {
+  description: getErrorMessage(err),
+});
           },
         },
       );

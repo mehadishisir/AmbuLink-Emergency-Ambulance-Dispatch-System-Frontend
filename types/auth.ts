@@ -1,3 +1,5 @@
+import { AuthUser } from "@/stores/auth-store";
+
 export interface RegisterPayload {
   name: string;
   email: string;
@@ -14,3 +16,15 @@ export interface VerifyEmailPayload {
   email: string;
   otp: string;
 }
+
+
+export type ApiResponse<T> = {
+  success: boolean;
+  message?: string;
+  data: T;
+};
+
+export type AuthResult = {
+  user: AuthUser;
+  accessToken: string;
+};
