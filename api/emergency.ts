@@ -5,21 +5,19 @@ import type {
   EmergencyRequestListResponse,
 } from "@/types/emergency";
 
-export const createEmergencyRequest = async (
-  payload: CreateEmergencyRequestPayload,
-) => {
+export function createEmergencyRequest(payload: CreateEmergencyRequestPayload) {
   return apiClient("/emergency-requests", {
     method: "POST",
     body: payload,
   });
-};
+}
 
-export const getMyRequests = async (query: {
+export function getMyRequests(query: {
   page?: number;
   limit?: number;
   status?: string;
   priority?: string;
-} = {}) => {
+} = {}) {
   const params = new URLSearchParams();
   if (query.page) params.set("page", String(query.page));
   if (query.limit) params.set("limit", String(query.limit));
@@ -36,13 +34,45 @@ export const getMyRequests = async (query: {
     meta: EmergencyRequestListResponse["meta"];
     data: EmergencyRequest[];
   }>;
-};
+}
 
-export const getRequestById = async (id: string) => {
+export function getRequestById(id: string) {
   return apiClient(`/emergency-requests/${id}`) as Promise<{
     success: boolean;
     statusCode: number;
     message: string;
     data: EmergencyRequest;
   }>;
-};
+}
+
+export function getAssignedRequests(query: {
+  page?: number;
+  limit?: number;
+  status?: string;
+} = {}) {
+  const params = new URLSearchParams();
+  if (query.page) params.set("page", String(query.page));
+  if (query.limit) params.set("limit", String(query.limit));
+  if (query.status) params.set("status", query.status);
+
+  const qs = params.toString();
+  return apiClient(
+    `/emergency-requests/assigned${qs ? `?${qs}` : ""}`,
+  ) as Promise<{
+    success: boolean;
+    statusCode: number;
+    message: string;
+    meta: EmergencyRequestListResponse["meta"];
+    data: EmergencyRequest[];
+  }>;
+}
+
+export function updateRequestStatus(
+  id: string,
+  payload: { status: string },
+) {
+  return apiClient(`/emergency-requests/${id}/status`, {
+    method: "PATCH",
+    body: payload,
+  });
+}

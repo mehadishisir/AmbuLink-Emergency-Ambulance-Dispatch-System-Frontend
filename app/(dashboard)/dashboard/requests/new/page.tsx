@@ -2,17 +2,32 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, LoaderCircle, MapPin, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  LoaderCircle,
+  MapPin,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useCreateEmergencyRequest } from "@/hooks/emergency.hook";
-import { emergencyStep1Schema, emergencyStep2Schema } from "@/validation/emergency.validation";
-import { getFieldError } from "@/lib/form-error";
+import {
+  emergencyStep1Schema,
+  emergencyStep2Schema,
+} from "@/validation/emergency.validation";
 
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
@@ -25,6 +40,7 @@ const priorities: { value: Priority; label: string; color: string }[] = [
 
 export default function NewRequestPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     description: "",
@@ -43,6 +59,7 @@ export default function NewRequestPage() {
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["my-requests"] });
           toast.success("Emergency request submitted!");
           router.push("/dashboard/requests");
         },

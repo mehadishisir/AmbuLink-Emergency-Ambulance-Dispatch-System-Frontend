@@ -51,3 +51,8 @@ export type EmergencyRequestListResponse = {
   };
   data: EmergencyRequest[];
 };
+
+
+export type UpdateStatusPayload = {
+  status: EmergencyRequestStatus;
+};
