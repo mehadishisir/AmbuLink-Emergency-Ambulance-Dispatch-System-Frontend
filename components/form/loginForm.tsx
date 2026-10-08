@@ -1,14 +1,17 @@
-
 "use client";
-
-import { useState, type FormEvent } from "react";
+import { getUserFromToken } from "@/lib/jwt";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { useForm } from "@tanstack/react-form";
+
+import { toast } from "sonner";
 import {
   Activity,
   Ambulance,
   ArrowDownRight,
   ArrowRight,
-  CheckCircle2,
   Eye,
   EyeOff,
   HeartPulse,
@@ -18,14 +21,24 @@ import {
   Sparkles,
   UserRound,
   LoaderCircle,
-  AlertCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+
+import { useLogin } from "@/hooks/auth.hook"; 
+import { useAuthStore } from "@/stores/auth-store";
+import { getErrorMessage } from "@/lib/error"; 
+import { getDashboardPath } from "@/lib/roles";
+import { DEMO_ACCOUNTS } from "@/lib/demoAccounts"; 
+import { loginSchema } from "@/validation/auth.validation";
+import { createSession } from "@/lib/session";
+
+
 type DemoRole = "admin" | "patient" | "driver";
+
 
 const demoRoles = [
   {
@@ -55,46 +68,61 @@ const demoRoles = [
 ];
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+
+
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+ 
+  const { mutate: login, isPending } = useLogin();
+
+  
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<DemoRole | null>(null);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
 
-  const isAnyLoading = isLoading || demoLoading !== null;
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setNotice("");
+  const isAnyLoading = isPending;
 
-    setIsLoading(true);
+  const isLoading = isPending && demoLoading === null;
 
-    try {
-      // TODO: Connect to the real backend login API.
-      // Never log passwords or pretend authentication succeeded.
-      setNotice("Login API integration is pending.");
-    } finally {
-      setIsLoading(false);
-    }
+
+  const submitLogin = (payload: { email: string; password: string }) => {
+    login(payload, {
+     
+
+onSuccess: async (res) => {
+  const { accessToken } = res.data;
+  const user = getUserFromToken(accessToken);
+  setAuth(user, accessToken);
+  await createSession(accessToken, user.role);
+
+  toast.success("Login successful", {
+    description: `Welcome back, ${user.name}!`,
+  });
+  router.push(getDashboardPath(user.role));
+},
+      onError: (err) => {
+   
+        toast.error("Login failed", { description: getErrorMessage(err) });
+      },
+   
+      onSettled: () => setDemoLoading(null),
+    });
   };
 
-  const handleDemoLogin = async (role: DemoRole) => {
-    setError("");
-    setNotice("");
-    setDemoLoading(role);
 
-    try {
-      // TODO: Authenticate using dedicated demo accounts.
-      // A real API response must determine access and redirection.
-      setNotice(
-        `${role.charAt(0).toUpperCase() + role.slice(1)} demo login is not connected yet.`,
-      );
-    } finally {
-      setDemoLoading(null);
-    }
+  const form = useForm({
+    defaultValues: { email: "", password: "" },
+  
+    validators: { onSubmit: loginSchema },
+
+    onSubmit: ({ value }) => submitLogin(value),
+  });
+
+
+  const handleDemoLogin = (role: DemoRole) => {
+    setDemoLoading(role);
+    submitLogin(DEMO_ACCOUNTS[role]);
   };
 
   return (
@@ -173,121 +201,128 @@ export function LoginForm() {
               </div>
             </div>
 
-            {/* Feedback */}
-            {error && (
-              <div
-                role="alert"
-                className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-              >
-                <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <p>{error}</p>
-              </div>
-            )}
+          
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit(); // validation চালায়, পাস করলে onSubmit
+              }}
+              className="space-y-5"
+            >
+          
+              <form.Field name="email">
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="email"
+                      className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600"
+                    >
+                      Email address
+                    </Label>
 
-            {notice && (
-              <div
-                role="status"
-                className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
-              >
-                <AlertCircle className="mt-0.5 size-4 shrink-0" />
-                <p>{notice}</p>
-              </div>
-            )}
+                    <div className="group relative">
+                      <Mail
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600"
+                      />
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600"
-                >
-                  Email address
-                </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        disabled={isAnyLoading}
+                        className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
+                      />
+                    </div>
 
-                <div className="group relative">
-                  <Mail
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600"
-                  />
-
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setError("");
-                      setNotice("");
-                    }}
-                    required
-                    disabled={isAnyLoading}
-                    className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 text-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
-                  />
-                </div>
-              </div>
+        
+                    {field.state.meta.isTouched && !field.state.meta.isValid && (
+                      <p className="text-xs text-red-600">
+                        {field.state.meta.errors
+                          .map((err) => err?.message)
+                          .join(", ")}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </form.Field>
 
               {/* Password */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3">
-                  <Label
-                    htmlFor="password"
-                    className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600"
-                  >
-                    Password
-                  </Label>
+              <form.Field name="password">
+                {(field) => (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label
+                        htmlFor="password"
+                        className="text-[11px] font-bold uppercase tracking-[0.13em] text-slate-600"
+                      >
+                        Password
+                      </Label>
 
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs font-semibold text-rose-600 underline-offset-4 transition-colors hover:text-rose-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                      <Link
+                        href="/forgot-password"
+                        className="text-xs font-semibold text-rose-600 underline-offset-4 transition-colors hover:text-rose-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
 
-                <div className="group relative">
-                  <LockKeyhole
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600"
-                  />
+                    <div className="group relative">
+                      <LockKeyhole
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-rose-600"
+                      />
 
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setError("");
-                      setNotice("");
-                    }}
-                    required
-                    disabled={isAnyLoading}
-                    className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 pr-12 text-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
-                  />
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        placeholder="Enter your password"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                        disabled={isAnyLoading}
+                        className="h-[50px] rounded-xl border-slate-200 bg-slate-50/70 pl-11 pr-12 text-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus-visible:border-rose-400 focus-visible:bg-white focus-visible:ring-4 focus-visible:ring-rose-500/10"
+                      />
 
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((current) => !current)}
-                    disabled={isAnyLoading}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    aria-pressed={showPassword}
-                    className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 disabled:opacity-50"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="size-[18px]" />
-                    ) : (
-                      <Eye className="size-[18px]" />
+                    
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((current) => !current)}
+                        disabled={isAnyLoading}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                        aria-pressed={showPassword}
+                        className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 disabled:opacity-50"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="size-[18px]" />
+                        ) : (
+                          <Eye className="size-[18px]" />
+                        )}
+                      </button>
+                    </div>
+
+                    {field.state.meta.isTouched && !field.state.meta.isValid && (
+                      <p className="text-xs text-red-600">
+                        {field.state.meta.errors
+                          .map((err) => err?.message)
+                          .join(", ")}
+                      </p>
                     )}
-                  </button>
-                </div>
-              </div>
+                  </div>
+                )}
+              </form.Field>
 
-              {/* Submit */}
               <Button
                 type="submit"
                 disabled={isAnyLoading}
@@ -316,7 +351,7 @@ export function LoginForm() {
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            {/* Demo roles */}
+           
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {demoRoles.map(({ role, label, description, Icon, accent, hover }) => {
                 const isRoleLoading = demoLoading === role;

@@ -32,6 +32,9 @@ import { useVerifyEmail } from "@/hooks/auth.hook";
 import { useAuthStore } from "@/stores/auth-store";
 import { verifyAccountSchema } from "@/validation/auth.validation";
 import { getErrorMessage } from "@/lib/error";
+import { getDashboardPath } from "@/lib/roles";
+import { success } from "zod";
+import { createSession } from "@/lib/session";
 
 
 const RESEND_COOLDOWN = 120;
@@ -69,18 +72,13 @@ export default function VerifyEmailForm() {
       verify(
         { email, otp: value.otp },
         {
-          onSuccess: (res) => {
-            const { user, accessToken } = res.data;
-            setAuth(user, accessToken);
-
-            toast.success("Verification successful", {
-              description: `Welcome, ${user.name}!`,
-            });
-
-            if (user.role === "ADMIN") router.push("/admin");
-            else if (user.role === "DRIVER") router.push("/provider");
-            else router.push("/dashboard");
-          },
+         onSuccess: async (res) => {
+  const { user, accessToken } = res.data;
+  setAuth(user, accessToken);
+  await createSession(accessToken, user.role);
+  toast.success("Login successful", { description: `Welcome back, ${user.name}!` });
+  router.push(getDashboardPath(user.role));
+},
           onError: (err) => {
             form.reset();
           toast.error("Verification failed", {

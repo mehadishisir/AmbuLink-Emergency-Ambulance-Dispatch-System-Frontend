@@ -25,6 +25,6 @@ export type ApiResponse<T> = {
 };
 
 export type AuthResult = {
-  user: AuthUser;
   accessToken: string;
+  refreshToken: string;
 };
