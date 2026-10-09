@@ -126,7 +126,7 @@ export default function AdminDashboard() {
                       tick={{ fontSize: 11 }}
                       stroke="#94a3b8"
                     />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" allowDecimals={false} />
                     <Tooltip
                       contentStyle={{
                         borderRadius: "8px",
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                         fontSize: "12px",
                       }}
                     />
-                    <Bar dataKey="count" fill="#e11d48" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="count" fill="#e11d48" radius={[6, 6, 0, 0]} maxBarSize={80} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
