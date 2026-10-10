@@ -54,39 +54,39 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="bg-white">
+    <div className="bg-[#0a0f1c] text-slate-100">
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8 sm:py-24">
         <div className="text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-rose-600">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-rose-400">
             Pricing
           </p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+          <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
             Simple, transparent pricing
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-400">
             No hidden fees. Pay only for the service you use. All prices in USD.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-6 lg:grid-cols-3">
+        <div className="mt-16 grid gap-5 lg:grid-cols-3">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-3xl border p-8 ${
+              className={`relative rounded-2xl border p-8 transition ${
                 plan.highlight
-                  ? "border-rose-300 bg-gradient-to-br from-rose-50 to-white shadow-xl ring-2 ring-rose-500/20"
-                  : "border-slate-200 bg-white"
+                  ? "border-rose-500/30 bg-gradient-to-br from-rose-500/[0.08] via-[#0d1424] to-[#0a0f1c] shadow-2xl shadow-rose-500/10"
+                  : "border-white/[0.06] bg-white/[0.015] hover:border-white/[0.12]"
               }`}
             >
               {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-rose-600/30">
                   Most Popular
                 </span>
               )}
 
-              <h3 className="text-xl font-bold text-slate-950">{plan.name}</h3>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-rose-600">
+              <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
+              <div className="mt-4 flex items-baseline gap-1.5">
+                <span className="text-4xl font-semibold tracking-tight text-white">
                   {plan.price}
                 </span>
                 <span className="text-sm text-slate-500">/{plan.unit}</span>
@@ -96,9 +96,11 @@ export default function PricingPage() {
                 {plan.features.map((f) => (
                   <li
                     key={f}
-                    className="flex items-start gap-2 text-sm text-slate-700"
+                    className="flex items-start gap-2.5 text-sm text-slate-300"
                   >
-                    <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                    <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-teal-500/10">
+                      <Check className="size-2.5 text-teal-400" />
+                    </span>
                     {f}
                   </li>
                 ))}
@@ -106,10 +108,10 @@ export default function PricingPage() {
 
               <Link href="/register" className="mt-8 block">
                 <Button
-                  className={`h-11 w-full rounded-xl text-sm font-bold ${
+                  className={`h-11 w-full rounded-lg text-sm font-semibold transition ${
                     plan.highlight
-                      ? "bg-rose-600 hover:bg-rose-700"
-                      : "bg-slate-900 hover:bg-slate-800"
+                      ? "bg-rose-600 text-white hover:bg-rose-500"
+                      : "border border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
                   }`}
                 >
                   Get Started

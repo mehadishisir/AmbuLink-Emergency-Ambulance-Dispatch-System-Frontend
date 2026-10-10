@@ -128,3 +128,132 @@
     @apply font-sans;
   }
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 4s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
+}
+
+.animate-fade-up-delay-1 { animation: fade-up 0.6s ease-out 0.1s both; }
+.animate-fade-up-delay-2 { animation: fade-up 0.6s ease-out 0.2s both; }
+.animate-fade-up-delay-3 { animation: fade-up 0.6s ease-out 0.3s both; }
+
+/* Hero mesh gradient */
+.hero-mesh {
+  background:
+    radial-gradient(at 20% 10%, rgba(244, 63, 94, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(59, 130, 246, 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, rgba(251, 146, 60, 0.10) 0px, transparent 50%);
+}
+
+
+/* AmbuLink premium animations */
+@keyframes route-dash {
+  to { stroke-dashoffset: -200; }
+}
+
+@keyframes marker-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+@keyframes marker-ping {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes slow-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-route-dash {
+  stroke-dasharray: 6 6;
+  animation: route-dash 4s linear infinite;
+}
+
+.animate-marker-pulse {
+  transform-origin: center;
+  animation: marker-pulse 2s ease-in-out infinite;
+}
+
+.animate-marker-ping {
+  transform-origin: center;
+  animation: marker-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-slow-fade-up {
+  animation: slow-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slow-fade-up-1 { animation: slow-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+.animate-slow-fade-up-2 { animation: slow-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.animate-slow-fade-up-3 { animation: slow-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.animate-slow-fade-up-4 { animation: slow-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+.animate-slow-fade-up-5 { animation: slow-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
+
+.animate-subtle-float {
+  animation: subtle-float 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-route-dash,
+  .animate-marker-pulse,
+  .animate-marker-ping,
+  .animate-slow-fade-up,
+  .animate-slow-fade-up-1,
+  .animate-slow-fade-up-2,
+  .animate-slow-fade-up-3,
+  .animate-slow-fade-up-4,
+  .animate-slow-fade-up-5,
+  .animate-subtle-float {
+    animation: none;
+  }
+}
