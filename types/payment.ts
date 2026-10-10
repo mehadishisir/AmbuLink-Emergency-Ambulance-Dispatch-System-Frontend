@@ -31,8 +31,8 @@ export type CreateCheckoutPayload = {
 };
 
 export type CheckoutSessionResponse = {
-  sessionId?: string;
-  url?: string;
+  checkoutUrl?: string;
   paymentUrl?: string;
-  id?: string;
+  url?: string;
+  payment?: Payment;
 };
