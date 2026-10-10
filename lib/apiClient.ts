@@ -12,6 +12,10 @@ const apiClient = ofetch.create({
       options.headers.set("Authorization", `Bearer ${token}`);
     }
   },
+  onResponseError({ response }) {
+    const message = response._data?.message;
+    throw new Error(message || "Request failed. Please try again");
+  },
 });
 
 export default apiClient;
