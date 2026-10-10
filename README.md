@@ -2,7 +2,7 @@
 
 A modern, production-quality emergency ambulance dispatch platform connecting **patients**, **drivers**, and **admins** in one coordinated system. Built with **Next.js 16 App Router** as part of Programming Hero B7A7 assignment.
 
-![Ambulink Banner](https://img.shields.io/badge/Next.js-16.3.7-black?style=for-the-badge&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-16.3.7-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
 ![Tailwind](https://img.shields.io/badge/Tailwind-v4-38bdf8?style=for-the-badge&logo=tailwindcss)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
@@ -17,7 +17,7 @@ A modern, production-quality emergency ambulance dispatch platform connecting **
 | **🔌 Live Backend API** | [ambulink-nine.vercel.app](https://ambulink-nine.vercel.app) |
 | **📦 Frontend Repo** | [github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System-Frontend](https://github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System-Frontend) |
 | **🗄️ Backend Repo** | [github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System](https://github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System) |
-| **🎥 Demo Video** | `[PASTE DEMO VIDEO LINK]` |
+| **🎥 Demo Video** | [PASTE DEMO VIDEO LINK HERE] |
 
 ---
 
@@ -53,7 +53,7 @@ A modern, production-quality emergency ambulance dispatch platform connecting **
 
 ### 🚑 Driver Features
 - Assigned trips dashboard with live status updates
-- Sequential status flow: `DISPATCHED → EN_ROUTE → PICKED_UP → GOING_TO_HOSPITAL → ARRIVED → COMPLETED`
+- Sequential status flow: DISPATCHED → EN_ROUTE → PICKED_UP → GOING_TO_HOSPITAL → ARRIVED → COMPLETED
 - Patient contact info access on assigned trips
 
 ### 👨‍💼 Admin Features
@@ -75,6 +75,7 @@ A modern, production-quality emergency ambulance dispatch platform connecting **
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 | Category | Technology |
 |---|---|
 | **Framework** | Next.js 16.3.7 (App Router, no `src/`, `--webpack` build) |
@@ -92,6 +93,7 @@ A modern, production-quality emergency ambulance dispatch platform connecting **
 | **Payments** | Stripe Checkout (test mode) |
 
 ### Backend
+
 | Category | Technology |
 |---|---|
 | **Runtime** | Node.js |
@@ -163,6 +165,7 @@ text
 | **Validation** | `validation/` | Zod schemas |
 
 ### Route Protection (`proxy.ts`)
+
 Next.js 16's replacement for `middleware.ts`:
 - Checks `ambulink-token` cookie on every request
 - Redirects logged-out users away from `/dashboard`, `/provider`, `/admin`
@@ -248,165 +251,3 @@ Mehadi Hassan
 GitHub: @mehadishisir
 
 Assignment: Programming Hero B7A7 — Emergency Ambulance Dispatch
-
-📜 License
-This project is part of Programming Hero's Level 2 Web Development course. MIT License.
-
-text
-
----
-
-## 📁 Backend README.md — Copy-Paste
-
-**File:** `C:\Projects\emergency-ambulance-dispatch\README.md`
-
-```markdown
-# 🚑 Ambulink — Backend API
-
-REST API for the Ambulink Emergency Ambulance Dispatch Platform. Built with **Express 5 + Prisma 6 + PostgreSQL** and **JWT-based authentication**.
-
-![Express](https://img.shields.io/badge/Express-5.x-black?style=for-the-badge&logo=express)
-![Prisma](https://img.shields.io/badge/Prisma-6.x-2D3748?style=for-the-badge&logo=prisma)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791?style=for-the-badge&logo=postgresql)
-
----
-
-## 🔗 Live URLs
-
-| Resource | URL |
-|---|---|
-| **Live API** | [ambulink-nine.vercel.app](https://ambulink-nine.vercel.app) |
-| **Frontend** | [ambu-link-emergency-ambulance-dispa-ashy.vercel.app](https://ambu-link-emergency-ambulance-dispa-ashy.vercel.app) |
-| **Backend Repo** | [github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System](https://github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System) |
-
----
-
-## 🛠️ Tech Stack
-
-- **Runtime:** Node.js
-- **Framework:** Express 5
-- **Language:** TypeScript
-- **Database:** PostgreSQL (Neon)
-- **ORM:** Prisma 6
-- **Auth:** JWT (access + refresh tokens)
-- **Password Hashing:** bcrypt
-- **Email:** Nodemailer + EJS
-- **Payments:** Stripe (test mode)
-- **Cache:** Redis (with DB fallback)
-
----
-
-## 📡 API Endpoints
-
-### 🔐 Auth (`/api/auth`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/register` | Public | Register new user + send OTP |
-| POST | `/verify-email` | Public | Verify OTP → returns JWT tokens |
-| POST | `/login` | Public | Login with email + password |
-| GET | `/me` | Auth | Get current user profile |
-| POST | `/resend-otp` | Public | Resend verification OTP |
-| POST | `/forgot-password` | Public | Request password reset OTP |
-| POST | `/reset-password` | Public | Reset password with OTP |
-
-### 🚑 Emergency Requests (`/api/emergency-requests`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/` | PATIENT | Create emergency request |
-| GET | `/` | ADMIN | Get all requests (with filters) |
-| GET | `/my-requests` | PATIENT | Get own requests |
-| GET | `/assigned` | DRIVER | Get assigned trips |
-| GET | `/:id` | All | Get single request detail |
-| PATCH | `/:id/assign` | ADMIN | Assign driver |
-| PATCH | `/:id/status` | ADMIN, DRIVER | Update request status |
-
-### 💳 Payments (`/api/payments`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/create-checkout-session` | PATIENT | Create Stripe session |
-| POST | `/verify-payment` | PATIENT, ADMIN | Verify payment |
-| GET | `/request/:emergencyRequestId` | PATIENT, ADMIN | Get payment by request |
-
-### 🚗 Drivers (`/api/drivers`)
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | `/` | ADMIN | Create driver |
-| GET | `/` | ADMIN | List all drivers |
-| GET | `/me` | DRIVER | Get own driver profile |
-| PATCH | `/me` | DRIVER | Update availability |
-| GET | `/:id` | ADMIN, DRIVER | Get driver by ID |
-| PATCH | `/:id` | ADMIN | Update driver |
-| DELETE | `/:id` | ADMIN | Delete driver |
-
----
-
-## 🔐 Authentication Flow
-Register → POST /auth/register → OTP sent
-↓
-Verify Email → POST /auth/verify-email → JWT tokens + cookies
-↓
-Login → POST /auth/login → JWT tokens + cookies
-↓
-Protected Request → Authorization: Bearer <token> OR cookie
-
-text
-
-**Roles:** `PATIENT` | `DRIVER` | `ADMIN`
-
----
-
-## 🚀 Local Setup
-
-```bash
-# 1. Clone
-git clone https://github.com/mehadishisir/AmbuLink-Emergency-Ambulance-Dispatch-System.git
-cd AmbuLink-Emergency-Ambulance-Dispatch-System
-
-# 2. Install
-npm install
-
-# 3. Setup .env
-cp .env.example .env
-# Fill: DATABASE_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET,
-#       ADMIN_EMAIL, ADMIN_PASSWORD, SMTP_USER, SMTP_PASSWORD,
-#       STRIPE_SECRET_KEY, REDIS_HOST, etc.
-
-# 4. Prisma
-npx prisma generate --schema prisma/schema/schema.prisma
-npx prisma migrate deploy --schema prisma/schema/schema.prisma
-
-# 5. Run
-npm run dev    # http://localhost:5000
-📊 Prisma Models
-User — id, name, email, phone, role, password, isActive, emailVerified, otp
-
-Driver — licenseNumber, availabilityStatus, userId
-
-EmergencyRequest — description, pickupAddress, priority, status, patientId, driverId, ambulanceId, hospitalId
-
-Payment — amount, provider, transactionId, status, userId, emergencyRequestId
-
-Ambulance — type, plateNumber, status
-
-Hospital — name, address, contact
-
-Notification — userId, type, message
-
-Enums
-UserRole: PATIENT | DRIVER | ADMIN
-
-EmergencyPriority: LOW | MEDIUM | HIGH | CRITICAL
-
-EmergencyRequestStatus: PENDING → DISPATCHING → DISPATCHED → EN_ROUTE → PICKED_UP → GOING_TO_HOSPITAL → ARRIVED → COMPLETED (or CANCELLED)
-
-DriverAvailabilityStatus: AVAILABLE | BUSY | OFFLINE
-
-PaymentProvider: BKASH | STRIPE
-
-PaymentStatus: PENDING | INITIATED | SUCCESS | FAILED | CANCELLED | REFUNDED
-
-👨‍💻 Author
-Mehadi Hassan — @mehadishisir
-
-Programming Hero B7A7 — Emergency Ambulance Dispatch
-
