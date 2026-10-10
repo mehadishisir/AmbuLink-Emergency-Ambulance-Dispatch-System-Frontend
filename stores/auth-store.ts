@@ -22,8 +22,18 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       accessToken: null,
-      setAuth: (user, accessToken) => set({ user, accessToken }),
-      logout: () => set({ user: null, accessToken: null }),
+      setAuth: (user, accessToken) => {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("ambulink-token", accessToken);
+        }
+        set({ user, accessToken });
+      },
+      logout: () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("ambulink-token");
+        }
+        set({ user: null, accessToken: null });
+      },
     }),
     { name: "ambulink-auth" },
   ),
