@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
+import { toast } from "sonner";
 
 import {
   Ambulance,
@@ -56,9 +57,30 @@ export function RegisterForm() {
       };
 
       registerMutation.mutate(registrationData, {
-        onSuccess: () => {
+        onSuccess: (res) => {
+          // ⚠️ Demo: OTP returned in response for evaluator convenience
+          const otp = (res as { data?: { otp?: string } })?.data?.otp;
+
+          if (otp) {
+            toast.info(`Demo OTP: ${otp}`, {
+              description:
+                "Copy this code — you'll need it on the verify page.",
+              duration: 15000,
+            });
+          } else {
+            toast.success("Registration successful!", {
+              description: "Check your email for the verification code.",
+            });
+          }
+
           const params = new URLSearchParams({ email: value.email });
           router.push(`/verify-email?${params.toString()}`);
+        },
+        onError: (err) => {
+          toast.error("Registration failed", {
+            description:
+              err instanceof Error ? err.message : "Please try again.",
+          });
         },
       });
     },
