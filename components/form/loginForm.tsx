@@ -207,7 +207,7 @@ onSuccess: async (res) => {
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                form.handleSubmit(); // validation চালায়, পাস করলে onSubmit
+                form.handleSubmit();
               }}
               className="space-y-5"
             >
